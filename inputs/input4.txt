@@ -1,0 +1,7 @@
+dimension_reduced_data(
+    x = x_coords,
+    y = y_coords,
+    d = 40,
+    perplexity = 4,
+    random_state = 42,
+)

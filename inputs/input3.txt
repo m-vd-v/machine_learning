@@ -1,0 +1,4 @@
+eigen_value_profile(
+    x = x_coords,
+    d = 40,
+)

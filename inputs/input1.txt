@@ -1,0 +1,4 @@
+print(pca(
+    x = x_coords,
+    d = 40,
+))
