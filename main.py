@@ -37,6 +37,7 @@ def pca(x: numpy.ndarray[numpy.ndarray], d: int, debug: bool = False) -> tuple:
     if debug:
         print("eigen values: ", eigen_values)
     # sorting the eigen_values and moving the eigen_vectors to their correct positions based on the sort
+    # according to https://stackoverflow.com/questions/8092920/sort-eigenvalues-and-associated-eigenvectors-after-using-numpy-linalg-eig-in-pyt
     idx = eigen_values.argsort()[::-1]  # sorting and then reversing array to get an array sorted from high to low
     eigen_values = eigen_values[idx]  # sorted eigenvalues are correct when comparing with output in themis
     eigen_vectors = eigen_vectors[:, idx]
@@ -46,12 +47,17 @@ def pca(x: numpy.ndarray[numpy.ndarray], d: int, debug: bool = False) -> tuple:
         print("eigen_vectors moved along with corresponding eigen_values:", eigen_vectors)
         print("principal components Ud:", Ud)
         print("shape of Ud", Ud.shape)
+    UdT = Ud.transpose()
+    Zd = UdT @ Z
+    if debug:
+        print("Zd:", Zd)
 
+    return (Ud, eigen_values, Zd)
     # return a matrix containing principal components Ud, a matrix (or a vector)
     # containing eigen-values, and reduced version of the data set Zd
     # return (Ud, D, Zd)
 
-pca(x_coords, 40, debug=True)
+print(pca(x_coords, 40, debug=True))
 
 ########## [ INPUT 2 ] #################################################################################
 
