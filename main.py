@@ -18,24 +18,40 @@ y_coords: numpy.ndarray = mat['Y']
 ########## [ INPUT 1 ] #################################################################################
 
 # output is a tuple of 3 arrays
-def pca(x: numpy.ndarray, d: int) -> tuple:
-    mean = x.mean()
-    print("mean =", mean)
-    st_dev = x.std()
-    print("st_dev =", st_dev)
-
-    Z: numpy.ndarray = (x - mean)/st_dev
-    print("\nZ:", Z)
-    Z.resize((1024, 1024))
-    print("\nZ resized to 1024x1024:", Z)
-    D = np.linalg.eig(Z)
-    print("\nD (eigenvalues of Z):", D)
+def pca(x: numpy.ndarray[numpy.ndarray], d: int, debug: bool = False) -> tuple:
+    x = x.T     # transposing the array, so we can easily iterate over columns instead of rows
+    for i, column in enumerate(x):
+        mean = column.mean()
+        st_dev = column.std()
+        x[i] = (x[i] - mean)/st_dev
+        if debug:
+            print("standardized mean and st_dev of column", i, "=", x[i].mean(), ",", x[i].std())
+            ## The mean and st_dev of each column are 0 and 1 respectively (accounting for rounding errors)
+    Z = x.T     # transposing again to original state to get standardized array data set Z
+    if debug:
+        print("Z: ", Z)
+    covar = np.cov(Z, rowvar=False)
+    eigen_values: numpy.ndarray
+    eigen_vectors: numpy.ndarray
+    eigen_values, eigen_vectors = numpy.linalg.eig(covar)
+    if debug:
+        print("eigen values: ", eigen_values)
+    # sorting the eigen_values and moving the eigen_vectors to their correct positions based on the sort
+    idx = eigen_values.argsort()[::-1]  # sorting and then reversing array to get an array sorted from high to low
+    eigen_values = eigen_values[idx]  # sorted eigenvalues are correct when comparing with output in themis
+    eigen_vectors = eigen_vectors[:, idx]
+    Ud = Z @ eigen_vectors[:, :d]   # calculating principal components while only keeping the first d components
+    if debug:
+        print("sorted eigen_values:", eigen_values)
+        print("eigen_vectors moved along with corresponding eigen_values:", eigen_vectors)
+        print("principal components Ud:", Ud)
+        print("shape of Ud", Ud.shape)
 
     # return a matrix containing principal components Ud, a matrix (or a vector)
     # containing eigen-values, and reduced version of the data set Zd
     # return (Ud, D, Zd)
 
-pca(x_coords, 0)
+pca(x_coords, 40, debug=True)
 
 ########## [ INPUT 2 ] #################################################################################
 
