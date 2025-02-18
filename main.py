@@ -6,6 +6,8 @@ import sys
 import numpy
 import numpy as np
 import scipy.io
+import sklearn
+from sklearn.manifold import TSNE
 
 file_path = "COIL20.mat"
 mat = scipy.io.loadmat(file_path)
@@ -54,8 +56,24 @@ def eigen_value_profile(x: numpy.ndarray, d: int):
 # input 4
 def dimension_reduced_data(x: numpy.array(numpy.array(float)), y: numpy.array(float),
                            d: int, perplexity: int, random_state: int):
-    pass
+    tsne = sklearn.manifold.TSNE(n_components=2, perplexity=perplexity, random_state=random_state)
+    x_tsne = tsne.fit_transform(x)
+    # plot
+    fig, ax = plt.subplots()
 
-plt.savefig(sys.stdout.buffer)
+    scatter = plt.scatter(x_tsne[:, 0], x_tsne[:,1], c=y)
+    labels = ['object{}'.format(i) for i in range(1, 20)]
+    ax.set(xlim=(-100, 100), xticks=np.arange(-100, 125, 25),
+           ylim=(-100, 100), yticks=np.arange(-100, 100, 25),
+           xlabel="t-sne 1", ylabel="t-sne 2", title="t-sne visualisation of dimension reduced data")
+    handles, _ = scatter.legend_elements(prop='colors')
+    plt.legend(handles, labels, title="Object ID", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.tight_layout()
 
-input_data_sample()
+    plt.show()
+
+
+#splt.savefig(sys.stdout.buffer)
+
+#input_data_sample()
+dimension_reduced_data(x_coords, y_coords, 40, 4, 42)
