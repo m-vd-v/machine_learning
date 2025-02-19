@@ -107,7 +107,7 @@ def dimension_reduced_data(x: numpy.array(numpy.array(float)), y: numpy.array(fl
             end = end + 1
         ax.scatter(x_tsne[start:(end-1), 0], x_tsne[start:(end-1),1], s=20, label="class " + str(i+1))
         start = end
-    ax.set(xlabel="t-sne 1", ylabel="t-sne 2", title="t-sne visualisation of dimension reduced data")
+    ax.set(xlabel="t-SNE 1", ylabel="t-SNE 2", title="t-SNE visualisation of dimension reduced data")
     plt.legend(title="Object ID", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.show()
 
