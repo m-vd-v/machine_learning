@@ -20,6 +20,23 @@ y_coords: numpy.ndarray = mat['Y']
 
 ########## [ INPUT 1 ] #################################################################################
 
+def get_eigen(x: numpy.ndarray):
+    x = x.T  # transposing the array, so we can easily iterate over columns instead of rows
+    for i, column in enumerate(x):
+        mean = column.mean()
+        st_dev = column.std()
+        x[i] = (x[i] - mean) / st_dev
+        ## The mean and st_dev of each column are 0 and 1 respectively (accounting for rounding errors)
+    Z = x.T  # transposing again to original state to get standardized array data set Z
+    covar = np.cov(Z, rowvar=False)
+    eigen_values: numpy.ndarray
+    eigen_vectors: numpy.ndarray
+    eigen_values, eigen_vectors = numpy.linalg.eig(covar)
+    idx = eigen_values.argsort()[::-1]  # sorting and then reversing array to get an array sorted from high to low
+    eigen_values = eigen_values[idx]
+    eigen_vectors = eigen_vectors[:, idx]
+    return (eigen_values, eigen_vectors, Z)
+
 # output is a tuple of 3 arrays
 def pca(x: numpy.ndarray[numpy.ndarray], d: int, debug: bool = False) -> tuple:
     x = x.T  # transposing the array, so we can easily iterate over columns instead of rows
@@ -88,23 +105,14 @@ def input_data_sample(sample_index: int = None):
 ########## [ INPUT 3 ] #################################################################################
 
 def eigen_value_profile(x: numpy.ndarray, d: int):
-    x = x.T  # transposing the array, so we can easily iterate over columns instead of rows
-    for i, column in enumerate(x):
-        mean = column.mean()
-        st_dev = column.std()
-        x[i] = (x[i] - mean) / st_dev
-            ## The mean and st_dev of each column are 0 and 1 respectively (accounting for rounding errors)
-    Z = x.T  # transposing again to original state to get standardized array data set Z
-    covar = np.cov(Z, rowvar=False)
-    eigen_values: numpy.ndarray
-    eigen_vectors: numpy.ndarray
-    eigen_values, eigen_vectors = numpy.linalg.eig(covar)
+    eigen_values, _, _ = get_eigen(x)
+    # sorted eigenvalues are correct when comparing with output in themis
     fig, ax = plt.subplots()
     ax.plot(eigen_values,"purple")
     ax.set(xlabel="Index eigen-value", ylabel="Eigen-value", title="Eigen-value Profile of the Dataset")
     plt.show()
 
-eigen_value_profile(x_coords, 40)
+#eigen_value_profile(x_coords, 40)
 
 
 ########## [ INPUT 4 ] #################################################################################
@@ -136,8 +144,19 @@ def dimension_reduced_data(x: numpy.array(numpy.array(float)), y: numpy.array(fl
     plt.legend(title="Object ID", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.show()
 
-
+def min_dimensions(keep: float, x: numpy.ndarray):
+    eigen_values, _, _ = get_eigen(x)
+    all_eig = sum(eigen_values)
+    store = 0
+    for i in range(0,len(eigen_values) - 1):
+        store = store + eigen_values[i]
+        if (store / all_eig) > keep:
+            return i + 1
+    return len(eigen_values)
 
 #input_data_sample()
 #dimension_reduced_data(x_coords, y_coords, 40, 4, 42)
 #plt.savefig(sys.stdout.buffer)
+print(min_dimensions(0.9, x_coords))
+print(min_dimensions(0.95, x_coords))
+print(min_dimensions(0.98, x_coords))
