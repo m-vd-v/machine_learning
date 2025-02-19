@@ -61,14 +61,13 @@ def pca(x: numpy.ndarray[numpy.ndarray], d: int, debug: bool = False) -> tuple:
     idx = eigen_values.argsort()[::-1]  # sorting and then reversing array to get an array sorted from high to low
     eigen_values = eigen_values[idx]  # sorted eigenvalues are correct when comparing with output in themis
     eigen_vectors = eigen_vectors[:, idx]
-    Ud = Z @ eigen_vectors[:, :d]   # calculating principal components while only keeping the first d components
+    Ud = eigen_vectors[:, :d]   # calculating principal components while only keeping the first d components
     if debug:
         print("sorted eigen_values:", eigen_values)
         print("eigen_vectors moved along with corresponding eigen_values:", eigen_vectors)
         print("principal components Ud:", Ud)
         print("shape of Ud", Ud.shape)
-    UdT = Ud.transpose()
-    Zd = UdT @ Z
+    Zd = Z @ Ud
     if debug:
         print("Zd:", Zd)
 
