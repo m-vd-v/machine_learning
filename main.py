@@ -1,4 +1,5 @@
 import random
+from xml.etree.ElementTree import tostring
 
 import matplotlib.pyplot as plt
 import sys
@@ -21,7 +22,7 @@ y_coords: numpy.ndarray = mat['Y']
 
 # output is a tuple of 3 arrays
 def pca(x: numpy.ndarray[numpy.ndarray], d: int, debug: bool = False) -> tuple:
-    x = x.T     # transposing the array, so we can easily iterate over columns instead of rows
+    x = x.T  # transposing the array, so we can easily iterate over columns instead of rows
     for i, column in enumerate(x):
         mean = column.mean()
         st_dev = column.std()
@@ -29,7 +30,7 @@ def pca(x: numpy.ndarray[numpy.ndarray], d: int, debug: bool = False) -> tuple:
         if debug:
             print("standardized mean and st_dev of column", i, "=", x[i].mean(), ",", x[i].std())
             ## The mean and st_dev of each column are 0 and 1 respectively (accounting for rounding errors)
-    Z = x.T     # transposing again to original state to get standardized array data set Z
+    Z = x.T    # transposing again to original state to get standardized array data set Z
     if debug:
         print("Z: ", Z)
     covar = np.cov(Z, rowvar=False)
@@ -59,7 +60,7 @@ def pca(x: numpy.ndarray[numpy.ndarray], d: int, debug: bool = False) -> tuple:
     # containing eigen-values, and reduced version of the data set Zd
     # return (Ud, D, Zd)
 
-print(pca(x_coords, 40, debug=True))
+print(pca(x_coords, 40, debug=False))
 
 ########## [ INPUT 2 ] #################################################################################
 
@@ -79,6 +80,7 @@ def input_data_sample(sample_index: int = None):
 
     plt.imshow(image, origin='lower')
     plt.title("Input data sample as an image")
+    plt.savefig(sys.stdout.buffer)
     plt.show()
 
 #input_data_sample()
@@ -86,16 +88,30 @@ def input_data_sample(sample_index: int = None):
 ########## [ INPUT 3 ] #################################################################################
 
 def eigen_value_profile(x: numpy.ndarray, d: int):
-    mean = x.mean()
-    st_dev = x.std()
-    Z: numpy.ndarray = (x - mean)/st_dev
-    #eigen_tuple = np.linalg.eig(Z)
+    x = x.T  # transposing the array, so we can easily iterate over columns instead of rows
+    for i, column in enumerate(x):
+        mean = column.mean()
+        st_dev = column.std()
+        x[i] = (x[i] - mean) / st_dev
+            ## The mean and st_dev of each column are 0 and 1 respectively (accounting for rounding errors)
+    Z = x.T  # transposing again to original state to get standardized array data set Z
+    covar = np.cov(Z, rowvar=False)
+    eigen_values: numpy.ndarray
+    eigen_vectors: numpy.ndarray
+    eigen_values, eigen_vectors = numpy.linalg.eig(covar)
+    fig, ax = plt.subplots()
+    ax.plot(eigen_values,"purple")
+    ax.set(xlabel="Index eigen-value", ylabel="Eigen-value", title="Eigen-value Profile of the Dataset")
+    plt.show()
+
+eigen_value_profile(x_coords, 40)
 
 
 ########## [ INPUT 4 ] #################################################################################
 
 def dimension_reduced_data(x: numpy.array(numpy.array(float)), y: numpy.array(float),
                            d: int, perplexity: int, random_state: int):
+    _, _, x_reduced = pca(x, d)
     tsne = sklearn.manifold.TSNE(n_components=2, perplexity=perplexity, random_state=random_state)
     x_tsne = tsne.fit_transform(x)
     # plot
@@ -107,14 +123,21 @@ def dimension_reduced_data(x: numpy.array(numpy.array(float)), y: numpy.array(fl
            ylim=(-100, 100), yticks=np.arange(-100, 100, 25),
            xlabel="t-sne 1", ylabel="t-sne 2", title="t-sne visualisation of dimension reduced data")
     handles, _ = scatter.legend_elements(prop='colors')
-    plt.legend(handles, labels, title="Object ID", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.legend(*scatter.legend_elements(), title="Object ID", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.tight_layout()
+    plt.savefig(sys.stdout.buffer)
+    plt.show()
 
+    fig, ax = plt.subplots()
+    for i in range(1,20):
+        ax.scatter([x_tsne[i, 0]], [x_tsne[i,1]], label="class " + str(i))
+        i = i + 1
+    ax.set(xlabel="t-sne 1", ylabel="t-sne 2", title="t-sne visualisation of dimension reduced data")
+    plt.legend(title="Object ID", bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.show()
 
 
-#splt.savefig(sys.stdout.buffer)
 
 #input_data_sample()
-dimension_reduced_data(x_coords, y_coords, 40, 4, 42)
+#dimension_reduced_data(x_coords, y_coords, 40, 4, 42)
 #plt.savefig(sys.stdout.buffer)
