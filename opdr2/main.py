@@ -1,32 +1,42 @@
 
 import pandas
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster import hierarchy
 
 df = pandas.read_csv("data_clustering.csv", header=None)
-print(df)
-
+x = np.array(df)
+print(x)
 #### [INPUT -1] ####
 
 def plot_data_using_scatter_plot():
-    pass
+    plt.scatter(x[:, 0], x[:, 1])
+    plt.title("Scatter plot - original data")
+    plt.xlabel("First feature")
+    plt.ylabel("Second feature")
+    plt.show()
 
 #### [INPUT -1] ####
 
 def plot_dendrogram(linkage_measure: str, calc_thresholds: bool):
-    match linkage_measure:
-        case "single":
-            pass
-        case "average":
-            pass
-        case "complete":
-            pass
+    dend = hierarchy.linkage(x, method=linkage_measure)
+    hierarchy.dendrogram(dend, no_labels=True)
+    plt.title(f"Dendogram - {linkage_measure} measure")
+    plt.xlabel("Observations")
+    plt.ylabel("Dissimilarity")
+    plt.show()
+
 
 
 def agglomerative_clustering(measure: str, k: int):
-    pass
-
-
-
-
+    clustering = AgglomerativeClustering(n_clusters=k, linkage=measure).fit(x)
+    labels = clustering.labels_
+    plt.scatter(x[:, 0], x[:, 1], c=labels, edgecolors="k")
+    plt.title(f"Clustering results for {k} clusters, using '{measure}' measure")
+    plt.xlabel("First feature")
+    plt.ylabel("Second feature")
+    plt.show()
 
 
 # This test case will not be graded, it is simply for you to check whether your data matches
