@@ -1,11 +1,13 @@
 
+import pandas
 
+df = pandas.read_csv("data_clustering.csv", header=None)
+print(df)
 
 #### [INPUT -1] ####
 
 def plot_data_using_scatter_plot():
     pass
-
 
 #### [INPUT -1] ####
 
