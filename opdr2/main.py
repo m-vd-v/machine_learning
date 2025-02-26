@@ -9,6 +9,7 @@ from scipy.cluster import hierarchy
 
 df = pandas.read_csv("data_clustering.csv", header=None)
 x = np.array(df)
+print(df)
 
 
 #### [INPUT -1] ####
@@ -80,11 +81,20 @@ def plot_data_using_scatter_plot():
 #### [INPUT -1] ####
 
 def plot_dendrogram(linkage_measure: str, calc_thresholds: bool):
-    dend = hierarchy.linkage(x, method=linkage_measure)
-    hierarchy.dendrogram(dend, no_labels=True)
+    z = hierarchy.linkage(x, method=linkage_measure)
+    hierarchy.dendrogram(z)
+    plt.xticks([])
     plt.title(f"Dendogram - {linkage_measure} measure")
     plt.xlabel("Observations")
     plt.ylabel("Dissimilarity")
+    if calc_thresholds:
+        two_threshold = (z[198, 2] + z[197, 2])/2
+        three_threshold = (z[197, 2] + z[196, 2])/2
+        four_threshold = (z[196, 2] + z[195, 2])/2
+        plt.axhline(y=two_threshold, c='green', linestyle='dashed')
+        plt.axhline(y=three_threshold, c='green', linestyle='dashed')
+        plt.axhline(y=four_threshold, c='green', linestyle='dashed')
+
     plt.show()
 
 
@@ -129,7 +139,7 @@ plt.xlabel("First feature")
 plt.ylabel("Second feature")
 plt.savefig(sys.stdout.buffer)
 plt.close()
-'''
+
 agglomerative_clustering(measure="single", k=2)
 
 # 5
@@ -146,3 +156,32 @@ agglomerative_clustering(measure="single", k=4)
 
 # 9
 agglomerative_clustering(measure="average", k=4)
+
+'''
+#results
+#dendrograms
+plot_dendrogram(linkage_measure = "average", calc_thresholds = True)
+plot_dendrogram(linkage_measure = "single", calc_thresholds = True)
+plot_dendrogram(linkage_measure = "complete", calc_thresholds = True)
+plot_dendrogram(linkage_measure = "ward", calc_thresholds = True)
+
+'''
+#agglomerative clustering
+plot_data_using_scatter_plot()
+
+agglomerative_clustering(measure="average", k=2)
+agglomerative_clustering(measure="average", k=3)
+agglomerative_clustering(measure="average", k=4)
+
+agglomerative_clustering(measure="complete", k=2)
+agglomerative_clustering(measure="complete", k=3)
+agglomerative_clustering(measure="complete", k=4)
+
+agglomerative_clustering(measure="single", k=2)
+agglomerative_clustering(measure="single", k=3)
+agglomerative_clustering(measure="single", k=4)
+
+agglomerative_clustering(measure="ward", k=2)
+agglomerative_clustering(measure="ward", k=3)
+agglomerative_clustering(measure="ward", k=4)
+'''
