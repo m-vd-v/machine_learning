@@ -6,67 +6,73 @@ import sklearn.metrics
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
 from scipy.cluster import hierarchy
+import scipy
 
 df = pandas.read_csv("data_clustering.csv", header=None)
 x = np.array(df)
-print(df)
-
-
-#### [INPUT -1] ####
 
 def distance(a, b) -> float:
-    ax = a[0]
-    ay = a[1]
-    bx = b[0]
-    by = b[1]
-    dx = abs(ax - bx)
-    dy = abs(ay - by)
-    return numpy.sqrt(pow(dx, 2) + pow(dy, 2))
+    return numpy.linalg.norm(a - b)
 
+def get_points_in_cluster(labels, points, cluster_id) -> list:
+    points_in_cluster = []
+    for i, label in enumerate(labels):
+        if label != cluster_id:
+            continue
+        point = points[i]
+        points_in_cluster.append(point)
+    return points_in_cluster
+
+def get_points_outside_cluster(labels, points, cluster_id) -> list:
+    points_outside_cluster: Array = []
+    for i, label in enumerate(labels):
+        if label == cluster_id:
+            continue
+        point = points[i]
+        points_outside_cluster.append(point)
+    return points_outside_cluster
 
 def calc_silhouette_score(labels: numpy.ndarray):
-    cluster_amt: int = labels.max() + 1
-    clusters = []
-    for i in range(cluster_amt):
-        clusters.append([])
-    for i in range(labels.size):
-        label = labels[i]
-        clusters[label].append(x[i])
+    cluster_amt = labels.max() + 1
 
-    for i, cluster in enumerate(clusters):
-        print(f"cluster({i}): len of {len(cluster)}")
+    S_scores = []
 
-    a_values = []
-    b_values = []
-    for cluster_i in clusters:
-        sum_: float = 0.0  # declared as sum_ so it doesn't shadow built-in sum
-        for i in cluster_i:
-            for j in cluster_i:
-                sum_ += distance(i, j)
-        a_i = (1 / (len(cluster_i) - 1)) * sum_
-        a_values.append(a_i)
+    for i in range(len(x)):
+        current_point = x[i]
+        cluster_i = labels[i]
+        points_in_cluster_i = get_points_in_cluster(labels, x, cluster_i)
+        points_outside_cluster = get_points_outside_cluster(labels, x, cluster_i)
 
-        min_distance: float = None
-        for cluster_k in clusters:
-            if cluster_i == cluster_k:
+        sum_ = 0.0  # declaring sum_ because sum would shadow an in-built function
+        for compare_point in points_in_cluster_i:
+            sum_ += distance(current_point, compare_point)
+        a_i = 0
+        if len(points_in_cluster_i) > 1:   # make sure not to divide by 0
+            a_i = sum_ / (len(points_in_cluster_i) - 1)
+
+        b_i = float('inf')
+        for cluster_k in range(cluster_amt):
+            if cluster_k == cluster_i:
                 continue
-            for i in cluster_i:
-                for j in cluster_k:
-                    current_distance = distance(i, j)
-                    if min_distance is None or current_distance < min_distance:
-                        min_distance = current_distance
-        b_values.append(min_distance)
-    ##### end of loop
-    sum_ = 0
-    for i in range(cluster_amt):
-        a_i = a_values[i]
-        b_i = b_values[i]
-        sum_ += ( (b_i - a_i) / (max(a_i, b_i)) )
-    S = (1/cluster_amt) * sum_
+            points_in_cluster_k = get_points_in_cluster(labels, x, cluster_k)
+            sum_ = 0
+            for compare_point in points_in_cluster_k:
+                sum_ += distance(current_point, compare_point)
+            current_b_i = sum_ / len(points_in_cluster_k)
+            if current_b_i < b_i:
+                b_i = current_b_i
 
-    print("real silhouette score:", silhouette_score(x, labels))
+        s_i = 0
+        if max(a_i, b_i) != 0:
+            s_i = (b_i - a_i) / max(a_i, b_i)
+        S_scores.append(s_i)
 
+    S = numpy.mean(S_scores)
+    print("own silhouette score: ", S)
+    print("true silhouette score:", sklearn.metrics.silhouette_score(x, labels))
     return S
+
+
 
 
 
@@ -109,12 +115,12 @@ def agglomerative_clustering(measure: str, k: int):
     plt.show()
 
 
-plot_dendrogram(linkage_measure="single", calc_thresholds=True)
+#plot_dendrogram(linkage_measure="single", calc_thresholds=True)
 
 # This test case will not be graded, it is simply for you to check whether your data matches
 # You will always pass this test case, you will have to diff the image yourself.
 # -1 ungraded
-plot_data_using_scatter_plot()
+#plot_data_using_scatter_plot()
 
 # 0
 # !! plot me with plt.xticks([])  to remove x-axis labels
@@ -160,14 +166,14 @@ agglomerative_clustering(measure="average", k=4)
 '''
 #results
 #dendrograms
-plot_dendrogram(linkage_measure = "average", calc_thresholds = True)
-plot_dendrogram(linkage_measure = "single", calc_thresholds = True)
-plot_dendrogram(linkage_measure = "complete", calc_thresholds = True)
-plot_dendrogram(linkage_measure = "ward", calc_thresholds = True)
+#plot_dendrogram(linkage_measure = "average", calc_thresholds = True)
+#plot_dendrogram(linkage_measure = "single", calc_thresholds = True)
+#plot_dendrogram(linkage_measure = "complete", calc_thresholds = True)
+#plot_dendrogram(linkage_measure = "ward", calc_thresholds = True)
 
-'''
+
 #agglomerative clustering
-plot_data_using_scatter_plot()
+#plot_data_using_scatter_plot()
 
 agglomerative_clustering(measure="average", k=2)
 agglomerative_clustering(measure="average", k=3)
@@ -184,4 +190,3 @@ agglomerative_clustering(measure="single", k=4)
 agglomerative_clustering(measure="ward", k=2)
 agglomerative_clustering(measure="ward", k=3)
 agglomerative_clustering(measure="ward", k=4)
-'''
