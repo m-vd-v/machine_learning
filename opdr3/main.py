@@ -32,19 +32,21 @@ def DBSCAN(D, eps, MinPts):
 
 
 def regionQuery(D, P, eps):
-    N = np.array([])
+    N = []
     for other_point in D:
         if other_point[2] == 0:
             other_point[2] = -2
         if distance(P, other_point) <= eps:
-            N = np.append(N, other_point)
+            print("otherpoint, N:", other_point, N)
+            N = N.append(other_point)
+    print("N: ", N)
     return N
 
 
 def expandCluster(D, P, neighbor_points, C, eps, MinPts):
     C = np.append(C, P)
+    print("nb points: ", neighbor_points)
     for other_point in neighbor_points:
-        print("other point: ", other_point)
         if other_point[2] != 0:
             other_point[2] = -2
             other_neighbor_points = regionQuery(D, other_point, eps)
