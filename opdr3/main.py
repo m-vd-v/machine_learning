@@ -20,17 +20,18 @@ def DBSCAN(D, eps, MinPts):
     D = np.pad(D, ((0, 0), (0, 1)))
     i = 0
     while i < len(D):
-        point = D[i]
-        D[i, 2] = -2
-        neighbor_pts = regionQuery(D, point, eps)
-        print("lenght neighbor_pts", len(neighbor_pts))
-        if len(neighbor_pts) < MinPts:
-            D[i, 2] = -1
-        else:
-            cluster += 1
-            expandCluster(D, point, neighbor_pts, cluster, eps, MinPts)
-        i += 1
-    print(D)
+        if D[i, 2] == 0:
+            point = D[i]
+            D[i, 2] = -2
+            neighbor_pts = regionQuery(D, point, eps)
+            print("lenght neighbor_pts", len(neighbor_pts))
+            if len(neighbor_pts) < MinPts:
+                D[i, 2] = -1
+            else:
+                cluster += 1
+                expandCluster(D, point, neighbor_pts, cluster, eps, MinPts)
+            i += 1
+    print("final" , D)
 
 
 def regionQuery(D, P, eps):
@@ -49,13 +50,14 @@ def regionQuery(D, P, eps):
 def expandCluster(D, P, neighbor_points, cluster, eps, MinPts):
     P[2] = cluster
     print("cluser", cluster)
+    print("neigbors", neighbor_points)
     #print("nb points: ", neighbor_points)
     for other_point in neighbor_points:
-        if other_point[2] != 0:
+        if other_point[2] <= 0:
             other_point[2] = -2
-            #other_neighbor_points = regionQuery(D, other_point, eps)
-            #if len(other_neighbor_points) >= MinPts:
-                #neighbor_points = np.append(neighbor_points, [other_point], axis=0)
+            other_neighbor_points = regionQuery(D, other_point, eps)
+            if len(other_neighbor_points) >= MinPts:
+                neighbor_points = np.append(neighbor_points, [other_point], axis=0)
         if other_point[2] <= 0: ## not part of any cluster
             other_point[2] = cluster
 
