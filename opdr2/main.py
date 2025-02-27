@@ -7,8 +7,9 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
 from scipy.cluster import hierarchy
 import scipy
+import sys
 
-df = pandas.read_csv("data_clustering.csv", header=None)
+df = pandas.read_csv("../opdr3/data_clustering.csv", header=None)
 x = np.array(df)
 
 def distance(a, b) -> float:
@@ -66,14 +67,59 @@ def calc_silhouette_score(labels: numpy.ndarray):
         if max(a_i, b_i) != 0:
             s_i = (b_i - a_i) / max(a_i, b_i)
         S_scores.append(s_i)
-
     S = numpy.mean(S_scores)
-    print("own silhouette score: ", S)
-    print("true silhouette score:", sklearn.metrics.silhouette_score(x, labels))
     return S
 
 
+def calc_wss(labels):
+    cluster_amt = labels.max() + 1
+    wss = 0
+    for i in range(cluster_amt):
+        points_in_cluster = get_points_in_cluster(labels, x, i)
+        center = np.mean(points_in_cluster)
+        wss += np.sum((points_in_cluster - center)**2)
+    return wss
 
+def calc_bss(labels):
+    cluster_amt = labels.max() + 1
+    mean_of_centers = np.mean(x)
+    bss = 0
+    for i in range(cluster_amt):
+        points_in_cluster = get_points_in_cluster(labels, x, i)
+        center = np.mean(points_in_cluster)
+        bss += len(points_in_cluster) * np.sum( (center - mean_of_centers)**2 )
+    return bss
+
+def bonus_get(measure: str, k: int):
+    clustering = AgglomerativeClustering(n_clusters=k, linkage=measure).fit(x)
+    labels = clustering.labels_
+
+    wss = calc_wss(labels)
+    bss = calc_bss(labels)
+    silhouette_score = calc_silhouette_score(labels)
+    return (wss, bss, silhouette_score)
+
+
+def bonus():
+    measures = ["average", "complete", "single", "ward"]
+    k_list = [2, 3, 4]
+
+    wss_scores = []
+    bss_scores = []
+    silhouettes = []
+
+    for measure in measures:
+        for k in k_list:
+            wss_score, bss_score, silhouette = bonus_get(measure, k)
+            wss_scores.append(wss_score)
+            bss_scores.append(bss_score)
+            silhouettes.append(silhouette)
+
+    return {
+        "wss_scores": wss_scores,
+        "bss_scores": bss_scores,
+        "silhouettes_defined": silhouettes
+    }
 
 
 def plot_data_using_scatter_plot():
@@ -82,6 +128,7 @@ def plot_data_using_scatter_plot():
     plt.xlabel("First feature")
     plt.ylabel("Second feature")
     plt.show()
+    plt.savefig(sys.stdout.buffer)
 
 
 #### [INPUT -1] ####
@@ -90,7 +137,7 @@ def plot_dendrogram(linkage_measure: str, calc_thresholds: bool):
     z = hierarchy.linkage(x, method=linkage_measure)
     hierarchy.dendrogram(z)
     plt.xticks([])
-    plt.title(f"Dendogram - {linkage_measure} measure")
+    plt.title(f"Dendrogram - {linkage_measure} measure")
     plt.xlabel("Observations")
     plt.ylabel("Dissimilarity")
     if calc_thresholds:
@@ -102,6 +149,7 @@ def plot_dendrogram(linkage_measure: str, calc_thresholds: bool):
         plt.axhline(y=four_threshold, c='green', linestyle='dashed')
 
     plt.show()
+    plt.savefig(sys.stdout.buffer)
 
 
 def agglomerative_clustering(measure: str, k: int):
@@ -113,6 +161,7 @@ def agglomerative_clustering(measure: str, k: int):
     plt.xlabel("First feature")
     plt.ylabel("Second feature")
     plt.show()
+    plt.savefig(sys.stdout.buffer)
 
 
 #plot_dendrogram(linkage_measure="single", calc_thresholds=True)
@@ -175,6 +224,8 @@ agglomerative_clustering(measure="average", k=4)
 #agglomerative clustering
 #plot_data_using_scatter_plot()
 
+'''
+
 agglomerative_clustering(measure="average", k=2)
 agglomerative_clustering(measure="average", k=3)
 agglomerative_clustering(measure="average", k=4)
@@ -190,3 +241,5 @@ agglomerative_clustering(measure="single", k=4)
 agglomerative_clustering(measure="ward", k=2)
 agglomerative_clustering(measure="ward", k=3)
 agglomerative_clustering(measure="ward", k=4)
+
+'''
