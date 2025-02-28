@@ -1,9 +1,9 @@
 import pandas
-
 import numpy as np
+import matplotlib.pyplot as plt
 
 df = pandas.read_csv("../opdr3/data_clustering.csv", header=None)
-x = np.array(df)
+data = np.array(df)
 
 #print(np.append(x, [[3, 4]], axis=0))
 
@@ -13,7 +13,7 @@ x = np.array(df)
 ## >0: cluster id
 
 def distance(a, b) -> float:
-    return np.linalg.norm(a - b)
+    return np.sqrt(np.sum(np.square(a - b)))
 
 def addInfo(D):
     i = 1
@@ -21,7 +21,7 @@ def addInfo(D):
     while i < len(D):
         point = [D[i, 0], D[i, 1], 0, i]
         B = np.append(B, [point], axis=0)
-        i = i + 1
+        i += 1
     return B
 
 
@@ -41,7 +41,9 @@ def DBSCAN(D, eps, MinPts):
                 cluster += 1
                 expandCluster(D, point, neighbor_pts, cluster, eps, MinPts)
         i += 1
-    print("final" , D[:, 2])
+    labels = D[:, 2].astype(int)
+    print("final" , labels)
+    return labels
 
 
 def regionQuery(D, P, eps):
@@ -62,15 +64,44 @@ def expandCluster(D, P, neighbor_points, cluster, eps, MinPts):
     #print("cluser", cluster)
     #print("neigbors", neighbor_points)
     #print("nb points: ", neighbor_points)
-    for other_point in neighbor_points:
-        if other_point[2] <= 0:
-            other_point[2] = -2
-            other_neighbor_points = regionQuery(D, other_point, eps)
+    i = 0
+    while i < len(neighbor_points):
+        point = neighbor_points[i]
+        if point[2] <= 0:
+            point[2] = -2
+            other_neighbor_points = regionQuery(D, point, eps)
+            #print("neighbours of neighbor",len(other_neighbor_points))
             if len(other_neighbor_points) >= MinPts:
-                neighbor_points = np.append(neighbor_points, [other_point], axis=0)
-        if other_point[2] <= 0: ## not part of any cluster
-            other_point[2] = cluster
-            D[(int)(other_point[3]), 2] = cluster
+                neighbor_points = np.append(neighbor_points, other_neighbor_points, axis=0)
+        if point[2] <= 0: ## not part of any cluster
+            point[2] = cluster
+            D[(int)(point[3]), 2] = cluster
+        i+=1
 
+def plot_db_scan(D, eps, k):
+    labels = DBSCAN(D, eps, k)
+    scatter = plt.scatter(D[:, 0], D[:, 1], c=labels, edgecolors="k", label = "color")
+    plt.title(f"DBSCAN clustering with MinPt={k},eps={eps}")
+    plt.xlabel("First feature")
+    plt.ylabel("Second feature")
+    plt.legend(*scatter.legend_elements(), title="Clusters")
+    plt.show()
 
-DBSCAN(x, 0.04, 3)
+def plot_knn(D, k, y):
+    pass
+
+#0
+#DBSCAN(data, 0.04, 3)
+# y should be an optional parameter, setting it to None should do nothing.. Setting it to anything else (int) should draw a line plt.axhline(y, linestyle='--')
+#1
+plot_knn(D = data,k = 2,y = None)
+#2
+plot_knn(D = data,k = 3,y = None)
+#3
+plot_knn(D = data,k = 4,y = None)
+#4
+plot_db_scan(D = data,eps = 0.04, k = 2,)
+#5
+plot_db_scan(D = data,eps = 0.04, k = 3)
+#6
+plot_db_scan(D = data,eps = 0.04, k = 4,)
