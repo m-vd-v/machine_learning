@@ -1,3 +1,5 @@
+import sys
+
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt
@@ -79,13 +81,17 @@ def expandCluster(D, P, neighbor_points, cluster, eps, MinPts):
         i+=1
 
 def plot_db_scan(D, eps, k):
-    labels = DBSCAN(D, eps, k)
-    scatter = plt.scatter(D[:, 0], D[:, 1], c=labels, edgecolors="k", label = "color")
+    cluster_labels = DBSCAN(D, eps, k)
+    plt.figure()
+    scatter = plt.scatter(D[:, 0], D[:, 1], c = cluster_labels, edgecolors = "k")
     plt.title(f"DBSCAN clustering with MinPt={k},eps={eps}")
-    plt.xlabel("First feature")
-    plt.ylabel("Second feature")
-    plt.legend(*scatter.legend_elements(), title="Clusters")
-    plt.show()
+    plt.xlabel('First feature')
+    plt.ylabel('Second feature')
+
+    legend = plt.legend(*scatter.legend_elements(num=sorted(np.unique(cluster_labels))), title="Clusters")
+    plt.gca().add_artist(legend)
+    plt.savefig(sys.stdout.buffer)
+    plt.close()
 
 def plot_knn(D, k, y):
     pass
