@@ -104,13 +104,13 @@ class Neighbor:
     index: int
     distance: float
 
-    def __init__(self, i: int, j: int, D):
-        self.index = j
-        self.distance = distance(D[i], D[j])
+    def __init__(self, index: int, distance: float):
+        self.index = index
+        self.distance = distance
 
 def neighbor_seen(neighbors: [Neighbor], current_index: int) -> bool:
     for neighbor in neighbors:
-        if neighbor is not None and neighbor.index == current_index:
+        if neighbor.index == current_index:
             return True
     return False
 
@@ -118,16 +118,15 @@ def neighbor_seen(neighbors: [Neighbor], current_index: int) -> bool:
 def get_furthest_neighbor(neighbors: [Neighbor]) -> Neighbor:
     furthest_neighbor = neighbors[0]
     for neighbor in neighbors:
-        if furthest_neighbor is None:
-            return furthest_neighbor
         if neighbor.distance > furthest_neighbor.distance:
             furthest_neighbor = neighbor
     return furthest_neighbor
 
 
+## replaces the furthest away neighbor with the current_neighbor, if the current_neighbor is closer than the furthest.
 def replace_furthest_neighbor(nearest_neighbors: [Neighbor], current_neighbor: Neighbor) -> [Neighbor]:
     furthest_neighbor: Neighbor = get_furthest_neighbor(nearest_neighbors)
-    if furthest_neighbor is None or current_neighbor.distance < furthest_neighbor.distance:
+    if current_neighbor.distance < furthest_neighbor.distance:
         nearest_neighbors.remove(furthest_neighbor)
         nearest_neighbors.append(current_neighbor)
     return nearest_neighbors
@@ -138,7 +137,7 @@ def avg_distances(neighbors: [Neighbor]) -> float:
     sum: float = 0.0
     for neighbor in neighbors:
         sum += neighbor.distance
-    return sum / (len(neighbors)-1)
+    return sum  # / (len(neighbors)-1)
 
 
 def plot_knn(D, k, y):
@@ -150,13 +149,14 @@ def plot_knn(D, k, y):
 
     for i, point in enumerate(D):
         nearest_neighbors: [Neighbor] = []
+        # fill nearest_neighbors with infinitely far away neighbors
         for _i in range(k):
-            nearest_neighbors.append(None)
+            nearest_neighbors.append( Neighbor(-1, float('inf')) )
 
         for j, neighbor_point in enumerate(D):
             if neighbor_seen(nearest_neighbors, j):
                 continue
-            neighbor = Neighbor(i, j, D)
+            neighbor = Neighbor(j, distance(D[i], D[j]))
             replace_furthest_neighbor(nearest_neighbors, neighbor)
 
         avg_distance = avg_distances(nearest_neighbors)
