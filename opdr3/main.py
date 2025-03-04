@@ -132,14 +132,6 @@ def replace_furthest_neighbor(nearest_neighbors: [Neighbor], current_neighbor: N
     return nearest_neighbors
 
 
-def avg_distances(neighbors: [Neighbor]) -> float:
-    print(neighbors)
-    sum: float = 0.0
-    for neighbor in neighbors:
-        sum += neighbor.distance
-    return sum  # / (len(neighbors)-1)
-
-
 def plot_knn(D, k, y):
     xpoints = np.array([])
     ypoints = np.array([])
@@ -159,8 +151,8 @@ def plot_knn(D, k, y):
             neighbor = Neighbor(j, distance(D[i], D[j]))
             replace_furthest_neighbor(nearest_neighbors, neighbor)
 
-        avg_distance = avg_distances(nearest_neighbors)
-        ypoints = np.append(ypoints, avg_distance)
+        furthest_distance = get_furthest_neighbor(nearest_neighbors).distance
+        ypoints = np.append(ypoints, furthest_distance)
 
     ypoints = np.sort(ypoints)
 
@@ -184,8 +176,8 @@ plot_knn(D=data, k=3, y=None)
 # 3
 plot_knn(D=data, k=4, y=None)
 # 4
-# plot_db_scan(D=data, eps=0.04, k=2,)
+#plot_db_scan(D=data, eps=0.04, k=2,)
 # 5
-# plot_db_scan(D=data, eps=0.04, k=3)
+#plot_db_scan(D=data, eps=0.04, k=3)
 # 6
-# plot_db_scan(D=data, eps=0.04, k=4,)
+#plot_db_scan(D=data, eps=0.04, k=4,)
