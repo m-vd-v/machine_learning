@@ -17,7 +17,7 @@ data = np.array(df)
 def distance(a, b) -> float:
     return np.sqrt(np.sum(np.square(a - b)))
 
-def addInfo(D):
+def add_info(D):
     i = 1
     B = np.array([[D[0, 0], D[0,1], 0, 0]])
     while i < len(D):
@@ -29,7 +29,7 @@ def addInfo(D):
 
 def DBSCAN(D, eps, MinPts):
     cluster = 0
-    D = addInfo(D)
+    D = add_info(D)
     i = 0
     while i < len(D):
         if D[i, 2] == 0:
