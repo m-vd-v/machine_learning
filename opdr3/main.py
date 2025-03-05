@@ -164,7 +164,7 @@ def plot_knn(D, k, y):
     plt.show()
     pass
 
-
+'''
 # 0
 # DBSCAN(data, 0.04, 3)
 # y should be an optional parameter, setting it to None should do nothing.. Setting it to anything else (int) should draw a line plt.axhline(y, linestyle='--')
@@ -180,3 +180,17 @@ plot_knn(D=data, k=4, y=None)
 #plot_db_scan(D=data, eps=0.04, k=3)
 # 6
 #plot_db_scan(D=data, eps=0.04, k=4,)
+'''
+
+
+# report
+plot_knn(D=data, k=2, y=0.025)
+# 2
+plot_knn(D=data, k=3, y=0.03)
+# 3
+plot_knn(D=data, k=4, y=0.035)
+
+
+plot_db_scan(D=data, eps=0.025, k=2)
+plot_db_scan(D=data, eps=0.03, k=3)
+plot_db_scan(D=data, eps=0.035, k=4)
