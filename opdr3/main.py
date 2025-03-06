@@ -3,8 +3,9 @@ import sys
 import pandas
 import numpy as np
 import matplotlib.pyplot as plt
+import sklearn.metrics
 
-df = pandas.read_csv("../opdr3/data_clustering.csv", header=None)
+df = pandas.read_csv("data_clustering.csv", header=None)
 data = np.array(df)
 
 
@@ -46,7 +47,7 @@ def DBSCAN(D, eps, MinPts):
                 expandCluster(D, point, neighbor_pts, cluster, eps, MinPts)
         i += 1
     labels = D[:, 2].astype(int)
-    print("final", labels)
+    # print("final", labels)
     return labels
 
 
@@ -83,9 +84,14 @@ def expandCluster(D, P, neighbor_points, cluster, eps, MinPts):
         i += 1
 
 
-def plot_db_scan(D, eps, k):
+def plot_db_scan(D, eps, k, testing: bool = False):
     cluster_labels = DBSCAN(D, eps, k)
     plt.figure()
+
+    silhouette_scores = sklearn.metrics.silhouette_score(D, cluster_labels)
+    if testing:
+        print("silhouette_scores for k=", k, ":", silhouette_scores)
+
     scatter = plt.scatter(D[:, 0], D[:, 1], c=cluster_labels, edgecolors="k")
     plt.title(f"DBSCAN clustering with MinPt={k},eps={eps}")
     plt.xlabel('First feature')
@@ -93,8 +99,10 @@ def plot_db_scan(D, eps, k):
 
     legend = plt.legend(*scatter.legend_elements(num=sorted(np.unique(cluster_labels))), title="Clusters")
     plt.gca().add_artist(legend)
-    plt.savefig(sys.stdout.buffer)
-    plt.show()
+    if testing:
+        plt.show()
+    else:
+        plt.savefig(sys.stdout.buffer)
     plt.close()
 
 
@@ -107,6 +115,7 @@ class Neighbor:
     def __init__(self, index: int, distance: float):
         self.index = index
         self.distance = distance
+
 
 def neighbor_seen(neighbors: [Neighbor], current_index: int) -> bool:
     for neighbor in neighbors:
@@ -132,7 +141,7 @@ def replace_furthest_neighbor(nearest_neighbors: [Neighbor], current_neighbor: N
     return nearest_neighbors
 
 
-def plot_knn(D, k, y):
+def plot_knn(D, k, y, testing: bool = False):
     xpoints = np.array([])
     ypoints = np.array([])
 
@@ -143,7 +152,7 @@ def plot_knn(D, k, y):
         nearest_neighbors: [Neighbor] = []
         # fill nearest_neighbors with infinitely far away neighbors
         for _i in range(k):
-            nearest_neighbors.append( Neighbor(-1, float('inf')) )
+            nearest_neighbors.append(Neighbor(-1, float('inf')))
 
         for j, neighbor_point in enumerate(D):
             if neighbor_seen(nearest_neighbors, j):
@@ -162,22 +171,32 @@ def plot_knn(D, k, y):
     plt.ylabel(str(k) + '-Nearest Neighbor Distance')
     if y:
         plt.axhline(y, linestyle='--')
-    plt.show()
-    pass
+    if testing:
+        plt.show()
+    else:
+        plt.savefig(sys.stdout.buffer)
 
+
+do_plot_knn: bool = False
+do_plot_dbscan: bool = False
 
 # 0
 # DBSCAN(data, 0.04, 3)
-# y should be an optional parameter, setting it to None should do nothing.. Setting it to anything else (int) should draw a line plt.axhline(y, linestyle='--')
-# 1
-plot_knn(D=data, k=2, y=None)
-# 2
-plot_knn(D=data, k=3, y=None)
-# 3
-plot_knn(D=data, k=4, y=None)
-# 4
-#plot_db_scan(D=data, eps=0.04, k=2,)
-# 5
-#plot_db_scan(D=data, eps=0.04, k=3)
-# 6
-#plot_db_scan(D=data, eps=0.04, k=4,)
+# y should be an optional parameter, setting it to None should do nothing... Setting it to anything else (int) should draw a line plt.axhline(y, linestyle='--')
+if do_plot_knn:
+    # 1
+    plot_knn2(D=data, k=2, y=None)
+    # 22
+    plot_knn2(D=data, k=3, y=None)
+    # 3
+    plot_knn2(D=data, k=4, y=None)
+    plot_knn2(D=data, k=5, y=None)
+
+if do_plot_dbscan:
+    # 4
+    plot_db_scan(D=data, eps=0.04, k=2, testing=True)
+    # 5
+    plot_db_scan(D=data, eps=0.04, k=3, testing=True)
+    # 6
+    plot_db_scan(D=data, eps=0.04, k=4, testing=True)
+    plot_db_scan(D=data, eps=0.04, k=5, testing=True)
