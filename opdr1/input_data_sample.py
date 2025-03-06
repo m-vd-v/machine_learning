@@ -17,3 +17,4 @@ def input_data_sample(sample_index: int = None):
     plt.imshow(image, origin='lower')
     plt.title("Input data sample as an image")
     plt.show()
+
