@@ -32,7 +32,6 @@ def vector_quantization(k: int, learning_rate: float, max_epoch: int):
     prototype_trace = []
     for i in range(max_epoch):
         np.random.shuffle(data)
-        print("first data point:", data[0])
         distance_sum = 0.0
         j = 0
         for point in data:
@@ -45,9 +44,14 @@ def vector_quantization(k: int, learning_rate: float, max_epoch: int):
                     closest_prototype_distance = current_distance
             prototypes[closest_prototype][0] += (point[0] - prototypes[closest_prototype][0]) * learning_rate
             prototypes[closest_prototype][1] += (point[1] - prototypes[closest_prototype][1]) * learning_rate
-            #print(j, " :new prototypes:", prototypes)
+            if j > 998:
+                print(j, " :new prototypes:", prototypes)
             j = j + 1
-        prototype_trace.append(prototypes)
+        if len(prototype_trace) == 0:
+            prototype_trace = [prototypes]
+        else:
+            prototype_trace = np.append(prototype_trace, [prototypes], axis = 0)
+        print("new prototypes list:", prototype_trace)
 
         for point in data:
             closest_prototype = prototypes[0]
@@ -67,7 +71,7 @@ def vector_quantization(k: int, learning_rate: float, max_epoch: int):
 
 
 def plot_vq(k: int, learning_rate: float, max_epoch: int):
-    prototype_trace, HVQ_trace = vector_quantization(k, learning_rate, max_epoch)
+    prototype_trace, HVQ_trace = vector_quantization(k=k, learning_rate=learning_rate, max_epoch=max_epoch)
     colors = ['red', 'blue', 'yellow', 'green']
     prototype_trace = np.array(prototype_trace)
     fig, ax = plt.subplots()
@@ -94,6 +98,6 @@ def plot_vq_error(HVQerror_k, max_epoch: int):
     plt.show()
 
 
-_, errors = vector_quantization(2, 0.1, 100)
-#plot_vq(k=2, learning_rate=0.1, max_epoch=100)
-plot_vq_error(HVQerror_k=errors, max_epoch=100)
+#_, errors = vector_quantization(2, 0.1, 100)
+plot_vq(k=2, learning_rate=0.1, max_epoch=100)
+#plot_vq_error(HVQerror_k=errors, max_epoch=100)
