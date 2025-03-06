@@ -19,8 +19,7 @@ data = np.array(df)
 def distance(a, b) -> float:
     return np.sqrt(np.sum(np.square(a - b)))
 
-
-def addInfo(D):
+def add_info(D):
     i = 1
     B = np.array([[D[0, 0], D[0, 1], 0, 0]])
     while i < len(D):
@@ -32,26 +31,26 @@ def addInfo(D):
 
 def DBSCAN(D, eps, MinPts):
     cluster = 0
-    D = addInfo(D)
+    D = add_info(D)
     i = 0
     while i < len(D):
         if D[i, 2] == 0:
             point = D[i]
             D[i, 2] = -2
-            neighbor_pts = regionQuery(D, point, eps)
+            neighbor_pts = region_query(D, point, eps)
             # print("lenght neighbor_pts", len(neighbor_pts))
             if len(neighbor_pts) < MinPts:
                 D[i, 2] = -1
             else:
                 cluster += 1
-                expandCluster(D, point, neighbor_pts, cluster, eps, MinPts)
+                expand_cluster(D, point, neighbor_pts, cluster, eps, MinPts)
         i += 1
     labels = D[:, 2].astype(int)
     # print("final", labels)
     return labels
 
 
-def regionQuery(D, P, eps):
+def region_query(D, P, eps):
     N = np.array([])
     for other_point in D:
         if distance(P[:2], other_point[:2]) <= eps:
@@ -64,7 +63,7 @@ def regionQuery(D, P, eps):
     return N
 
 
-def expandCluster(D, P, neighbor_points, cluster, eps, MinPts):
+def expand_cluster(D, P, neighbor_points, cluster, eps, MinPts):
     P[2] = cluster
     # print("cluser", cluster)
     # print("neigbors", neighbor_points)
@@ -74,7 +73,7 @@ def expandCluster(D, P, neighbor_points, cluster, eps, MinPts):
         point = neighbor_points[i]
         if point[2] <= 0:
             point[2] = -2
-            other_neighbor_points = regionQuery(D, point, eps)
+            other_neighbor_points = region_query(D, point, eps)
             # print("neighbours of neighbor",len(other_neighbor_points))
             if len(other_neighbor_points) >= MinPts:
                 neighbor_points = np.append(neighbor_points, other_neighbor_points, axis=0)
