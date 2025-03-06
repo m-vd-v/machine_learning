@@ -80,7 +80,8 @@ def plot_vq(k: int, learning_rate: float, max_epoch: int):
     for i in range(k):
         prototype = prototype_trace[:, i]
         print("prototype col:", prototype)
-        ax.scatter(prototype[:, 0], prototype[:, 1], edgecolors='k', c=colors[i])
+        ax.scatter(prototype[:, 0], prototype[:, 1], edgecolors='face', c=colors[i])
+        #ax.plot(prototype[:, 0], prototype[:, 1], c=colors[i])
 
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
