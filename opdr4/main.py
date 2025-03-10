@@ -24,7 +24,8 @@ def distance(a, b) -> float:
 def vector_quantization(k: int, learning_rate: float, max_epoch: int):
     prototypes = []
     for i in range(k):
-        prototypes.append(data[ random.randrange(0, P) ])
+        point = data[random.randrange(0, P)]
+        prototypes.append([point[0], point[1]])
     print("prototypes:", prototypes)
 
     HVQ_trace = []
@@ -44,28 +45,25 @@ def vector_quantization(k: int, learning_rate: float, max_epoch: int):
                     closest_prototype_distance = current_distance
             prototypes[closest_prototype][0] += (point[0] - prototypes[closest_prototype][0]) * learning_rate
             prototypes[closest_prototype][1] += (point[1] - prototypes[closest_prototype][1]) * learning_rate
-            if j > 998:
-                print(j, " :new prototypes:", prototypes)
+            #print(j, " :new prototypes:", prototypes)
             j = j + 1
         if len(prototype_trace) == 0:
             prototype_trace = [prototypes]
         else:
             prototype_trace = np.append(prototype_trace, [prototypes], axis = 0)
-        print("new prototypes list:", prototype_trace)
+        #print("added prototype:", prototypes)
 
         for point in data:
-            closest_prototype = prototypes[0]
             closest_prototype_distance = distance(point, prototypes[0])
             for prototype in prototypes:
                 current_distance = distance(prototype, point)
                 if closest_prototype_distance > current_distance:
-                    closest_prototype = prototype
                     closest_prototype_distance = current_distance
             distance_sum += closest_prototype_distance
         HVQ_trace.append(distance_sum)
 
-    print("HVQ_trace (length=", len(HVQ_trace), "): ", HVQ_trace)
-    print("prototype_trace: ", prototype_trace)
+    #print("HVQ_trace (length=", len(HVQ_trace), "): ", HVQ_trace)
+    #print("prototype_trace: ", prototype_trace)
 
     return (prototype_trace, HVQ_trace)
 
@@ -81,7 +79,7 @@ def plot_vq(k: int, learning_rate: float, max_epoch: int):
         prototype = prototype_trace[:, i]
         print("prototype col:", prototype)
         ax.scatter(prototype[:, 0], prototype[:, 1], edgecolors='face', c=colors[i])
-        #ax.plot(prototype[:, 0], prototype[:, 1], c=colors[i])
+        ax.plot(prototype[:, 0], prototype[:, 1], c=colors[i])
 
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
