@@ -46,8 +46,8 @@ def linear_vector_quantization(k: int, learning_rate: float, max_epoch: int):
     prototypes = []
     for i in range(k):
         data1, data2 = split()
-        point1 = random.choice(data1)
-        point2 = random.choice(data2)
+        point1 = data1[ np.random.randint(0, len(data1)) ]
+        point2 = data2[ np.random.randint(0, len(data2)) ]
         prototypes.append([point1[0], point1[1], point1[2]])
         prototypes.append([point2[0], point2[1], point2[2]])
     prototypes = np.array(prototypes)
