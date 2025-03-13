@@ -18,21 +18,18 @@ np.set_printoptions(
     threshold=sys.maxsize
 )
 
-def set_labels():
-    first_point = np.array([data[0][0], data[0][1], 0])
+def set_labels(dataset):
+    first_point = np.array([dataset[0][0], dataset[0][1], 0])
     new_data = np.array([first_point])
     i = 1
-    while i < K:
+    while i < len(dataset):
         label = 0
         if i >= K/2:
             label = 1
-        new_point = np.array([ data[i][0], data[i][1], label ])
+        new_point = np.array([ dataset[i][0], dataset[i][1], label ])
         new_data = np.append(new_data, [new_point], axis=0)
         i += 1
     return new_data
-
-labelled_data = set_labels()
-print(labelled_data)
 
 
 
@@ -43,9 +40,10 @@ def distance(a, b) -> float:
 
 
 def linear_vector_quantization(k: int, learning_rate: float, max_epoch: int):
+    labelled_data = set_labels(data)
     prototypes = []
+    data1, data2 = split(labelled_data)
     for i in range(k):
-        data1, data2 = split()
         point1 = random.choice(data1)
         point2 = random.choice(data2)
         prototypes.append([point1[0], point1[1], point1[2]])
@@ -57,7 +55,7 @@ def linear_vector_quantization(k: int, learning_rate: float, max_epoch: int):
     prototype_trace = np.append(prototype_trace, [np.copy(prototypes)], axis=0)    ## making sure initial positions are accounted for
     #print("initial prototype_trace:", prototype_trace)
 
-    Num_misclassification = []
+    num_misclassification = []
 
     for i in range(max_epoch):
         #np.random.shuffle(labelled_data)
@@ -94,10 +92,11 @@ def linear_vector_quantization(k: int, learning_rate: float, max_epoch: int):
 
             if point[2] != closest_prototype[2]:
                 current_num_misclassification += 1
-        Num_misclassification.append(current_num_misclassification)
+        num_misclassification.append(current_num_misclassification)
 
+    labels = []
     for i in range(K):
-        point = labelled_data[i]
+        point = data[i]
         closest_prototype_distance = distance(point, prototypes[0])
         closest_prototype = prototypes[0]
         for prototype in prototypes:
@@ -105,37 +104,27 @@ def linear_vector_quantization(k: int, learning_rate: float, max_epoch: int):
             if closest_prototype_distance > current_distance:
                 closest_prototype_distance = current_distance
                 closest_prototype = prototype
-        labelled_data[i][2] = closest_prototype[2]
-        print(i)
-    print(labelled_data)
-
-
+        labels.append(int(closest_prototype[2]))
+    #print(labels)
 
     prototype_trace = np.array(prototype_trace)
 
-    predicetd_labels = labelled_data[:, 2]
-
-    return prototype_trace, predicetd_labels, Num_misclassification
+    return prototype_trace, labels, num_misclassification
 
 
 def plot_lvq(k: int, learning_rate: float, max_epoch: int):
-    prototype_trace, predicetd_labels, Num_misclassification = linear_vector_quantization(k=k, learning_rate=learning_rate, max_epoch=max_epoch)
-    colors = ['red', 'blue', 'yellow', 'green']
+    prototype_trace, predicted_labels, num_misclassification = linear_vector_quantization(k=k, learning_rate=learning_rate, max_epoch=max_epoch)
+    colors = ['red', 'blue']
     prototype_trace = np.array(prototype_trace)
     fig, ax = plt.subplots()
 
-    data1, data2 = split()
-
-
+    for i in range(K):
+        plt.scatter(data[i, 0], data[i, 1], color=colors[predicted_labels[i]])
     for i in range(2*k):
         prototype = prototype_trace[:, i]
         ax.scatter(prototype[:, 0], prototype[:, 1], edgecolors='face', c=colors[ int(prototype[0][2]) ], marker="*", s=200)
         ax.plot(prototype[:, 0], prototype[:, 1], c=colors[ int(prototype[0][2]) ])
 
-    if len(data1) > 0:
-        plt.scatter(data1[:, 0], data1[:, 1], color='red')
-    if len(data2) > 0:
-        plt.scatter(data2[:, 0], data2[:, 1], color='blue')
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
 
@@ -164,10 +153,10 @@ def plot_error_rate(num_prototypes, learning_rate, max_epoch: int):
     plt.close()
 
 
-def split():
+def split(dataset):
     arr1: np.array = np.array([])
     arr2: np.array = np.array([])
-    for point in labelled_data:
+    for point in dataset:
         if point[2] == 0:
             if len(arr1) <= 0:
                 arr1 = np.array([point])
@@ -180,5 +169,5 @@ def split():
                 arr2 = np.append(arr2, [point], axis=0)
     return arr1, arr2
 
-#plot_lvq(k=2, learning_rate=0.002, max_epoch=100)
-#plot_error_rate(num_prototypes=2, learning_rate=0.002, max_epoch=100)
+plot_lvq(k=2, learning_rate=0.002, max_epoch=100)
+plot_error_rate(num_prototypes=2, learning_rate=0.002, max_epoch=100)
