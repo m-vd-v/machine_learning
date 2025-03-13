@@ -128,9 +128,9 @@ def plot_trajectory(num_prototypes: int, learning_rate: float, max_epoch: int):
         plt.scatter(data[i, 0], data[i, 1], color=colors[predicted_labels[i]])
     for i in range(2 * num_prototypes):
         prototype = prototype_trace[:, i]
-        ax.scatter(prototype[:, 0], prototype[:, 1], edgecolors='face', c=colors[int(prototype[0][2])], marker="*",
+        ax.scatter(prototype[:, 0], prototype[:, 1], edgecolors='face', c=colors[i%2], marker="*",
                    s=200)
-        ax.plot(prototype[:, 0], prototype[:, 1], c=colors[int(prototype[0][2])])
+        ax.plot(prototype[:, 0], prototype[:, 1], c=colors[i%2])
 
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
@@ -188,5 +188,5 @@ def plot_data():
     plt.close()
 
 #plot_data()
-plot_trajectory(num_prototypes=2, learning_rate=0.002, max_epoch=100)
+#plot_trajectory(num_prototypes=2, learning_rate=0.002, max_epoch=100)
 #plot_error_rate(num_prototypes=2, learning_rate=0.002, max_epoch=100)
