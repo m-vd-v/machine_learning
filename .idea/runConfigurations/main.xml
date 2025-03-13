@@ -1,19 +1,18 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
     <module name="intro_to_machine_learning_2" />
-    <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
     <option name="SDK_HOME" value="" />
-    <option name="SDK_NAME" value="Python 3.11 (Venv)" />
+    <option name="SDK_NAME" value="Python 3.11" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/opdr3" />
     <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/opdr3/main.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/opdr4/main.py" />
     <option name="PARAMETERS" value="" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
