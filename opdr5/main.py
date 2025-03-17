@@ -11,13 +11,6 @@ data = np.array(df)
 K = len(data)
 t_max = 100
 
-np.random.seed(1740844038)
-np.set_printoptions(
-    precision=5,
-    suppress=True,
-    threshold=sys.maxsize
-)
-
 def set_labels(data):
     first_point = np.array([data[0][0], data[0][1], 0])
     new_data = np.array([first_point])
@@ -52,7 +45,6 @@ def linear_vector_quantization(num_prototypes: int, learning_rate: float, max_ep
     prototypes = np.array(prototypes)
     #print("###prototypes:", prototypes)
 
-    print("prototypes: ", prototypes)
     prototype_trace = np.array([prototypes[:, :2]])
     #print("initial prototype_trace:", prototype_trace)
 
@@ -66,7 +58,7 @@ def linear_vector_quantization(num_prototypes: int, learning_rate: float, max_ep
             closest_prototype_distance = distance(point, prototypes[0])
             for i in range(num_prototypes*2):
                 current_distance = distance(prototypes[i], point)
-                if closest_prototype_distance > current_distance:
+                if closest_prototype_distance > current_distance or (closest_prototype_distance == current_distance and prototypes[closest_prototype][2] != point[2]):
                     closest_prototype = i
                     closest_prototype_distance = current_distance
 
@@ -87,7 +79,7 @@ def linear_vector_quantization(num_prototypes: int, learning_rate: float, max_ep
             closest_prototype = prototypes[0]
             for prototype in prototypes:
                 current_distance = distance(prototype, point)
-                if closest_prototype_distance > current_distance:
+                if closest_prototype_distance > current_distance or (closest_prototype_distance == current_distance and closest_prototype[2] != point[2]):
                     closest_prototype_distance = current_distance
                     closest_prototype = prototype
 
@@ -105,10 +97,12 @@ def linear_vector_quantization(num_prototypes: int, learning_rate: float, max_ep
             if closest_prototype_distance > current_distance:
                 closest_prototype_distance = current_distance
                 closest_prototype = prototype
-        labels.append(int(closest_prototype[2]))
+        labels.append(int(closest_prototype[2]) + 1)
     #print(labels)
 
     prototype_trace = np.array(prototype_trace)
+    labels = np.array(labels)
+    num_misclassification = np.array(num_misclassification)
 
     return prototype_trace, labels, num_misclassification
 
@@ -118,14 +112,12 @@ def plot_trajectory(num_prototypes: int, learning_rate: float, max_epoch: int):
                                                                                           learning_rate=learning_rate,
                                                                                           max_epoch=max_epoch)
 
-    print(prototype_trace)
-
     colors = ['red', 'blue']
     prototype_trace = np.array(prototype_trace)
     fig, ax = plt.subplots()
 
     for i in range(K):
-        plt.scatter(data[i, 0], data[i, 1], color=colors[predicted_labels[i]])
+        plt.scatter(data[i, 0], data[i, 1], color=colors[predicted_labels[i] - 1])
     for i in range(2 * num_prototypes):
         prototype = prototype_trace[:, i]
         ax.scatter(prototype[:, 0], prototype[:, 1], edgecolors='face', c=colors[i%2], marker="*",
@@ -136,20 +128,21 @@ def plot_trajectory(num_prototypes: int, learning_rate: float, max_epoch: int):
     plt.ylabel('Feature 2')
 
     plt.title('Trajectory Of Prototypes')
-    # plt.savefig(sys.stdout.buffer)
-    plt.show()
+    plt.savefig(sys.stdout.buffer)
+    #plt.show()
     plt.close()
 
 
 def plot_error_rate(num_prototypes, learning_rate, max_epoch: int):
     _, _, error_rate = linear_vector_quantization(num_prototypes, learning_rate, max_epoch)
-
+    #print(error_rate)
+    error_percent = []
     for i in range(len(error_rate)):
-        error_rate[i] = error_rate[i]/100
+        error_percent.append(error_rate[i]/100)
 
     fig, ax = plt.subplots()
     #print("errors", HVQerror_k)
-    ax.plot(range(max_epoch), error_rate)
+    ax.plot(range(max_epoch), error_percent)
 
     plt.xlabel('Epoch')
     plt.ylabel('The error rate in %')
