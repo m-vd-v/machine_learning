@@ -5,6 +5,9 @@ import pandas
 import numpy as np
 import matplotlib.pyplot as plt
 
+np.random.seed(1740844038)
+np.set_printoptions(precision=5,suppress=True,threshold=sys.maxsize)
+
 df = pandas.read_csv("data_lvq.csv", header=None)
 data = np.array(df)
 
@@ -36,12 +39,14 @@ def distance(a, b) -> float:
 def linear_vector_quantization(num_prototypes: int, learning_rate: float, max_epoch: int):
     labelled_data = set_labels(data)
     prototypes = []
-    data1, data2 = split(labelled_data)
+    data1 = labelled_data[labelled_data[:, 2] == 0, :]
+    data2 = labelled_data[labelled_data[:, 2] == 1, :]
+    points1 = np.random.choice(len(data1), num_prototypes, replace=False)
+    points2 = np.random.choice(len(data2), num_prototypes, replace=False)
     for i in range(num_prototypes):
-        point1 = data1[ np.random.randint(0, len(data1)) ]
-        point2 = data2[ np.random.randint(0, len(data2)) ]
-        prototypes.append([point1[0], point1[1], point1[2]])
-        prototypes.append([point2[0], point2[1], point2[2]])
+        prototypes.append(data1[points1[i]])
+    for i in range(num_prototypes):
+        prototypes.append(data2[points2[i]])
     prototypes = np.array(prototypes)
     #print("###prototypes:", prototypes)
 
@@ -111,25 +116,26 @@ def plot_trajectory(num_prototypes: int, learning_rate: float, max_epoch: int):
     prototype_trace, predicted_labels, num_misclassification = linear_vector_quantization(num_prototypes=num_prototypes,
                                                                                           learning_rate=learning_rate,
                                                                                           max_epoch=max_epoch)
-
+    #print(prototype_trace)
     colors = ['red', 'blue']
-    prototype_trace = np.array(prototype_trace)
     fig, ax = plt.subplots()
 
     for i in range(K):
         plt.scatter(data[i, 0], data[i, 1], color=colors[predicted_labels[i] - 1])
     for i in range(2 * num_prototypes):
+        label = 0
+        if i >= num_prototypes:
+            label = 1
         prototype = prototype_trace[:, i]
-        ax.scatter(prototype[:, 0], prototype[:, 1], edgecolors='face', c=colors[i%2], marker="*",
+        ax.scatter(prototype[max_epoch, 0], prototype[max_epoch, 1], edgecolors='face', c=colors[label], marker="*",
                    s=200)
-        ax.plot(prototype[:, 0], prototype[:, 1], c=colors[i%2])
 
     plt.xlabel('Feature 1')
     plt.ylabel('Feature 2')
 
     plt.title('Trajectory Of Prototypes')
     plt.savefig(sys.stdout.buffer)
-    #plt.show()
+    plt.show()
     plt.close()
 
 
@@ -181,5 +187,5 @@ def plot_data():
     plt.close()
 
 #plot_data()
-#plot_trajectory(num_prototypes=2, learning_rate=0.002, max_epoch=100)
+#plot_trajectory(num_prototypes=1, learning_rate=0.002, max_epoch=100)
 #plot_error_rate(num_prototypes=2, learning_rate=0.002, max_epoch=100)
